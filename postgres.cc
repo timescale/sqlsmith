@@ -219,6 +219,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
 	     "where prorettype::regtype::text not in ('event_trigger', 'trigger', 'opaque', 'internal') "
 	     "and proname <> 'pg_event_trigger_table_rewrite_reason' "
 	     "and proname <> 'pg_event_trigger_table_rewrite_oid' "
+	     "and proname <> 'pg_reload_conf' "
 	     "and proname !~ '^ri_fkey_' "
 	     "and not (proretset or " + procedure_is_aggregate + " or " + procedure_is_window + ") ");
 
