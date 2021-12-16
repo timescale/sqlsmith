@@ -33,7 +33,7 @@ bool pg_type::consistent(sqltype *rvalue)
   case 'm': /* multirange */
   case 'e': /* enum */
     return this == t;
-    
+
   case 'p': /* pseudo type: accept any concrete matching type */
     if (name == "anyarray" || name == "anycompatiblearray") {
       return t->typelem_ != InvalidOid;
@@ -56,7 +56,7 @@ bool pg_type::consistent(sqltype *rvalue)
     } else {
       return false;
     }
-      
+
   default:
     throw std::logic_error("unknown typtype");
   }
@@ -118,7 +118,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
 	     "else format('%I.%I', typnamespace::regnamespace, typname) end, "
 	     "oid, typdelim, typrelid, typelem, typarray, typtype "
 	     "from pg_type ");
-  
+
   for (auto row = r.begin(); row != r.end(); ++row) {
 #ifdef HAVE_LIBPQXX8
     pqxx::row_ref row_ref = row[0];
@@ -163,7 +163,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
 	            "is_insertable_into, "
 	            "table_type "
 	     "from information_schema.tables");
-	     
+
   for (auto row = r.begin(); row != r.end(); ++row) {
 #ifdef HAVE_LIBPQXX8
     pqxx::row_ref row_ref = row[0];
@@ -176,9 +176,9 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
     string table_type(row[3].as<string>());
 #endif
 
-	if (no_catalog && ((schema == "pg_catalog") || (schema == "information_schema")))
+	if (no_catalog && ((schema == "pg_catalog") || (schema == "information_schema") || (schema == "_timescaledb_cache") || (schema == "_timescaledb_catalog") || (schema == "_timescaledb_config") || (schema == "_timescaledb_internal") || (schema == "timescaledb_information")))
 		continue;
-      
+
     tables.push_back(
 #ifdef HAVE_LIBPQXX8
 			   table(row[0][0].as<string>(),
@@ -189,7 +189,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
 			   ((insertable == "YES") ? true : false),
 			   ((table_type == "BASE TABLE") ? true : false)));
   }
-	     
+
   cerr << "done." << endl;
 
   cerr << "Loading columns and constraints...";
@@ -220,7 +220,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
     for (auto row : w.exec(q)) {
       t->constraints.push_back(row[0].as<string>());
     }
-    
+
   }
   cerr << "done." << endl;
 
@@ -265,7 +265,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
     string q("select unnest(proargtypes) "
 	     "from pg_proc ");
     q += " where oid = " + w.quote(proc.specific_name);
-      
+
     r = w.exec(q);
     for (auto row : r) {
       sqltype *t = oid2type[row[0].as<OID>()];
@@ -302,7 +302,7 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
     string q("select unnest(proargtypes) "
 	     "from pg_proc ");
     q += " where oid = " + w.quote(proc.specific_name);
-      
+
     r = w.exec(q);
     for (auto row : r) {
       sqltype *t = oid2type[row[0].as<OID>()];
@@ -373,7 +373,7 @@ void dut_libpq::command(const std::string &stmt)
 	const char *sqlstate = PQresultErrorField(res, PG_DIAG_SQLSTATE);
 	if (!sqlstate || !strlen(sqlstate))
 	     sqlstate =  (CONNECTION_OK != PQstatus(conn)) ? "08000" : "?????";
-	
+
 	std::string error_string(errmsg);
 	std::string sqlstate_string(sqlstate);
 	PQclear(res);
