@@ -57,6 +57,17 @@ extern "C" void cerr_log_handler(int)
   exit(1);
 }
 
+// Get current date/time
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
+
+    return buf;
+}
+
 int main(int argc, char *argv[])
 {
   cerr << PACKAGE_NAME " " GITREV << endl;
@@ -130,6 +141,7 @@ int main(int argc, char *argv[])
 	   istringstream(options["rng-state"]) >> smith::rng;
       } else {
 	   smith::rng.seed(options.count("seed") ? stoi(options["seed"]) : getpid());
+	   cout << currentDateTime() << " Seed " << (options.count("seed") ? stoi(options["seed"]) : getpid()) << endl;
       }
 
       vector<shared_ptr<logger> > loggers;
