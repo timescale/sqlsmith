@@ -148,21 +148,21 @@ schema_pqxx::schema_pqxx(std::string &conninfo, bool no_catalog) : c(conninfo)
 	            "is_insertable_into, "
 	            "table_type "
 	     "from information_schema.tables");
-	     
+
   for (auto row = r.begin(); row != r.end(); ++row) {
     string schema(row[1].as<string>());
     string insertable(row[2].as<string>());
     string table_type(row[3].as<string>());
 
-	if (no_catalog && ((schema == "pg_catalog") || (schema == "information_schema")))
+	if (no_catalog && ((schema == "pg_catalog") || (schema == "information_schema") || (schema == "_timescaledb_cache") || (schema == "_timescaledb_catalog") || (schema == "_timescaledb_config") || (schema == "_timescaledb_internal") || (schema == "timescaledb_information")))
 		continue;
-      
+
     tables.push_back(table(row[0].as<string>(),
 			   schema,
 			   ((insertable == "YES") ? true : false),
 			   ((table_type == "BASE TABLE") ? true : false)));
   }
-	     
+
   cerr << "done." << endl;
 
   cerr << "Loading columns and constraints...";
